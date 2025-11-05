@@ -1,0 +1,69 @@
+---
+- name: Ensure virtualenv exists
+  command: python3 -m venv {{ app_dir }}/venv
+  args:
+    creates: "{{ app_dir }}/venv/bin/activate"
+  become_user: "{{ app_user }}"
+
+- name: Upload Flask app file
+  copy:
+    src: app.py
+    dest: "{{ app_dir }}/app.py"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0644"
+
+- name: Render requirements.txt
+  template:
+    src: requirements.txt.j2
+    dest: "{{ app_dir }}/requirements.txt"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0644"
+
+- name: Install Python dependencies in venv
+  pip:
+    requirements: "{{ app_dir }}/requirements.txt"
+    virtualenv: "{{ app_dir }}/venv"
+    virtualenv_python: python3
+
+- name: Render environment file
+  copy:
+    dest: "/etc/{{ app_name }}.env"
+    content: |
+      FLASK_ENV=production
+      DB_NAME={{ db_name }}
+      DB_USER={{ db_user }}
+      DB_PASSWORD={{ db_password }}
+      DB_HOST={{ db_host }}
+      DB_PORT={{ db_port }}
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Install systemd service
+  template:
+    src: app.service.j2
+    dest: "/etc/systemd/system/{{ app_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Enable and start app service
+  service:
+    name: "{{ app_name }}"
+    state: started
+    enabled: yes
+
+- name: Ensure Flask service is running
+  systemd:
+    name: "{{ app_name }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+- name: Pause playbook execution for 30 seconds
+  command:
+    sleep 30

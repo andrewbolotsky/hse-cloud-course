@@ -1,0 +1,21 @@
+---
+- name: Build image Ubuntu + Flask + Nginx + PostgreSQL
+  hosts: all
+  become: yes
+  vars:
+    app_name: flaskapp
+    app_user: flaskapp
+    app_dir: /opt/flaskapp
+    nginx_listen_port: 80
+
+
+    db_name: flaskdb
+    db_user: flaskuser
+    db_password: "password"
+    db_host: "127.0.0.1"
+    db_port: 5432
+  roles:
+    - common
+    - app
+    - nginx
+

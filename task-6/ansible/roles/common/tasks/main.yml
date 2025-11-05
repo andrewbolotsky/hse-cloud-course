@@ -1,0 +1,47 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install base packages
+  apt:
+    name:
+      - python3
+      - python3-venv
+      - python3-pip
+      - git
+      - nginx
+      - acl
+    state: present
+
+- name: Install PostgreSQL
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+  when: install_postgres | bool
+
+- name: Ensure PostgreSQL service started and enabled
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+  when: install_postgres | bool
+
+- name: Create application user
+  user:
+    name: "{{ app_user }}"
+    system: yes
+    create_home: yes
+    shell: /usr/sbin/nologin
+
+- name: Create app directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0755"

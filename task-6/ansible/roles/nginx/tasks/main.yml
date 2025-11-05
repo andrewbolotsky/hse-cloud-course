@@ -1,0 +1,31 @@
+---
+- name: Write Nginx site config
+  template:
+    src: flaskapp.conf.j2
+    dest: "/etc/nginx/sites-available/{{ app_name }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable site
+  file:
+    src: "/etc/nginx/sites-available/{{ app_name }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ app_name }}.conf"
+    state: link
+    force: true
+
+- name: Disable default site
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+
+- name: Test Nginx config
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+
+- name: Reload Nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes
