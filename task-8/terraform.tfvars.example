@@ -1,0 +1,9 @@
+
+project_name   = "hse-cloud-app"
+environment    = "dev"
+
+ssh_public_key = "ssh-ed25519 AAAA... user@host"
+
+db_password    = "ChangeMe123!"
+
+bucket_name    = "hse-cloud-task8-your-unique-suffix"
