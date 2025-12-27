@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "my-web-app.fullname" . }}-frontend-nginx
+  labels:
+    {{- include "my-web-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+data:
+  default.conf: |
+    server {
+      listen 80;
+
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+      }
+    
+      location /api {
+        proxy_pass http://backend-service:5000/;
+      }
+
+      location /api1 {
+        proxy_pass http://backend-service:5000/;
+      }
+
+      location /api2 {
+        proxy_pass http://backend-service:5000/;
+      }
+
+      location /health {
+        proxy_pass http://backend-service:5000/health;
+      }
+    }

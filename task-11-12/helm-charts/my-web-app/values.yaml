@@ -1,0 +1,46 @@
+
+image:
+  tag: "latest"
+
+replicaCount: 2
+
+frontend:
+  image:
+    repository: nginx
+  service:
+    port: 80
+  livenessProbe:
+    httpGet:
+      path: "/"
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: "/"
+      port: 80
+    initialDelaySeconds: 2
+    periodSeconds: 5
+
+backend:
+  image:
+    repository: andrewbolotsky/simple-flask-app
+  service:
+    port: 5000
+  livenessProbe:
+    httpGet:
+      path: "/health"
+      port: 5000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: "/ready"
+      port: 5000
+    initialDelaySeconds: 2
+    periodSeconds: 5
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
